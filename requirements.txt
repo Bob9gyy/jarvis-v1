@@ -1,0 +1,21 @@
+# JARVIS — Python dependencies
+# Core GUI
+PySide6>=6.5.0
+
+# LLM (Ollama REST client)
+requests>=2.31.0
+
+# System stats (optional but recommended)
+psutil>=5.9.0
+
+# Memory / semantic search (optional — app degrades gracefully without these)
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# Voice — offline STT + TTS (optional)
+# vosk>=0.3.45        # pip install vosk
+# sounddevice>=0.4.6  # pip install sounddevice
+# pyttsx3>=2.90       # pip install pyttsx3
+
+# Config
+PyYAML>=6.0

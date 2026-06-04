@@ -1,0 +1,40 @@
+# JARVIS configuration
+# Edit this file to change runtime behaviour.
+
+app:
+  name: JARVIS
+  version: "1.1"
+
+llm:
+  default_model: qwen3:8b
+  fast_model: qwen3:8b
+  deep_model: qwen3:14b
+  ollama_url: http://localhost:11434
+  temperature: 0.7
+  num_ctx: 4096
+  timeout_seconds: 120
+  auto_route: true
+
+memory:
+  path: ./db
+  relevance_threshold: 0.35
+  embedding_model: all-MiniLM-L6-v2
+
+voice:
+  enabled: false          # set true and install vosk/sounddevice/pyttsx3
+  wake_words:
+    - hey jarvis
+    - jarvis
+  tts_rate: 175
+  tts_volume: 0.92
+  model_dirs:
+    - ./vosk-model-small-en-us-0.15
+    - ./vosk-model-en-us-0.22
+
+agent:
+  max_tool_rounds: 5
+  agent_mode_default: true
+
+security:
+  max_read_bytes: 524288
+  max_tool_output: 4000
