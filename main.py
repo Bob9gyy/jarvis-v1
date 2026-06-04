@@ -1,5 +1,5 @@
 """
-main.py — JARVIS Full Entry Point
+main.py — JARVIS Entry Point (Fixed Memory Import)
 """
 
 import sys
@@ -10,11 +10,11 @@ from loading_screen import LoadingScreen
 from main_ui import JarvisWindow
 
 from llm.llmrouter import LLMRouter
-from memory import MemoryEngine
+from memory import MemoryEngine          # ← Now uses root memory.py
 from browser_agent import BrowserAgent
 from core_verifier import CoreVerifier
 from plugin_system import PluginSystem
-from core.agent_core import AgentCore   # Full agent core
+from core.agent_core import AgentCore
 
 
 def main():
@@ -36,24 +36,33 @@ def main():
     loaded = plugins.load_all_plugins()
     print(f"✅ Loaded {loaded} plugins")
 
-    # Full Agent Core
-    agent = AgentCore(llm=llm, memory=memory, browser=browser, verifier=verifier, plugins=plugins)
+    agent = AgentCore(
+        llm=llm, 
+        memory=memory, 
+        browser=browser, 
+        verifier=verifier, 
+        plugins=plugins, 
+        config=config
+    )
 
     splash = LoadingScreen()
     splash.show()
 
-    def on_boot_finished():
-        splash.close()
-        window = JarvisWindow(
-            llm=llm,
-            memory=memory,
-            agent=agent,
-            browser=browser,
-            config=config
-        )
-        app._jarvis_window = window
-        window.show()
-        print("🚀 JARVIS FULL ARCHITECTURE ONLINE")
+        def on_boot_finished():
+        try:
+            splash.close()
+            window = JarvisWindow(
+                llm=llm,
+                memory=memory,
+                agent=agent,
+                browser=browser,
+                config=config
+            )
+            app._jarvis_window = window
+            window.show()
+            print("🚀 JARVIS FULLY ONLINE")
+        except Exception as e:
+            print(f"Window creation error: {e}")
 
     splash.finished.connect(on_boot_finished)
     sys.exit(app.exec())
