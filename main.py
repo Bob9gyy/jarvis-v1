@@ -1,39 +1,59 @@
 """
-main.py — JARVIS entry point
-Wires the animated HUD boot screen to the main window.
-
-Usage:
-    python main.py
+main.py — JARVIS Full Entry Point
 """
-import sys
 
+import sys
 from PySide6.QtWidgets import QApplication
 
+from config_loader import ConfigLoader
 from loading_screen import LoadingScreen
-from llm_router import LLMRouter
-from memory import MemoryEngine
 from main_ui import JarvisWindow
+
+from llm.llmrouter import LLMRouter
+from memory import MemoryEngine
+from browser_agent import BrowserAgent
+from core_verifier import CoreVerifier
+from plugin_system import PluginSystem
+from core.agent_core import AgentCore   # Full agent core
 
 
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("JARVIS")
-    app.setQuitOnLastWindowClosed(False)   # survive in tray after window close
+    app.setQuitOnLastWindowClosed(False)
 
-    # Initialise backend objects on the main thread
-    # Constructors may print startup info to stdout
+    config = ConfigLoader("config.yaml")
+    success, errors = config.validate()
+    if not success:
+        print("Config warnings:", errors)
+
     llm = LLMRouter()
-    mem = MemoryEngine()
+    memory = MemoryEngine()
+    browser = BrowserAgent()
+    verifier = CoreVerifier()
+    plugins = PluginSystem()
 
-    # Show animated HUD boot screen first
+    loaded = plugins.load_all_plugins()
+    print(f"✅ Loaded {loaded} plugins")
+
+    # Full Agent Core
+    agent = AgentCore(llm=llm, memory=memory, browser=browser, verifier=verifier, plugins=plugins)
+
     splash = LoadingScreen()
     splash.show()
 
     def on_boot_finished():
         splash.close()
-        win = JarvisWindow(llm, mem)
-        app._jarvis_win = win   # prevent GC
-        win.show()
+        window = JarvisWindow(
+            llm=llm,
+            memory=memory,
+            agent=agent,
+            browser=browser,
+            config=config
+        )
+        app._jarvis_window = window
+        window.show()
+        print("🚀 JARVIS FULL ARCHITECTURE ONLINE")
 
     splash.finished.connect(on_boot_finished)
     sys.exit(app.exec())
