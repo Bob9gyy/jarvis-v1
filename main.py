@@ -10,7 +10,7 @@ from loading_screen import LoadingScreen
 from main_ui import JarvisWindow
 
 from llm.llmrouter import LLMRouter
-from memory import MemoryEngine          # ← Now uses root memory.py
+from memory import MemoryEngine
 from browser_agent import BrowserAgent
 from core_verifier import CoreVerifier
 from plugin_system import PluginSystem
@@ -34,21 +34,24 @@ def main():
     plugins = PluginSystem()
 
     loaded = plugins.load_all_plugins()
-    print(f"✅ Loaded {loaded} plugins")
+    print(f"Loaded {loaded} plugins")
 
     agent = AgentCore(
-        llm=llm, 
-        memory=memory, 
-        browser=browser, 
-        verifier=verifier, 
-        plugins=plugins, 
+        llm=llm,
+        memory=memory,
+        browser=browser,
+        verifier=verifier,
+        plugins=plugins,
         config=config
     )
 
     splash = LoadingScreen()
     splash.show()
 
-        def on_boot_finished():
+    window = None  # keep reference alive
+
+    def on_boot_finished():
+        nonlocal window
         try:
             splash.close()
             window = JarvisWindow(
@@ -60,11 +63,16 @@ def main():
             )
             app._jarvis_window = window
             window.show()
-            print("🚀 JARVIS FULLY ONLINE")
+            print("JARVIS FULLY ONLINE")
         except Exception as e:
             print(f"Window creation error: {e}")
 
-    splash.finished.connect(on_boot_finished)
+    # Safe connect
+    try:
+        splash.finished.connect(on_boot_finished)
+    except Exception:
+        on_boot_finished()
+
     sys.exit(app.exec())
 
 
